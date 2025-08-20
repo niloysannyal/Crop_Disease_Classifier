@@ -81,7 +81,7 @@ def predict_disease(crop: str, image_file):
         return None, None
     image = Image.open(image_file).convert("RGB")
     img_array = image.resize((CROPS[crop_key]["image_size"], CROPS[crop_key]["image_size"]))
-    img_array = np.expand_dims(np.array(img_array)/255.0, axis=0)
+    img_array = np.expand_dims(np.array(img_array), axis=0)
     preds = models_dict[crop_key].predict(img_array)
     idx = np.argmax(preds[0])
     class_name = CROPS[crop_key]["class_names"][idx]
