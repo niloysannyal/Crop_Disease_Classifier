@@ -86,7 +86,8 @@ def predict_disease(crop: str, image_file):
     idx = np.argmax(preds[0])
     class_name = CROPS[crop_key]["class_names"][idx]
     confidence = float(np.max(preds[0]))
-    return class_name, f"{confidence*100:.2f}%"
+    confidence = confidence*100
+    return class_name, confidence
 
 
 
@@ -223,13 +224,13 @@ st.markdown(
 # =======================
 # Sidebar Crop Selection
 # =======================
-crop = st.selectbox("Select Crop", ["Potato", "Corn", "Rice", "Wheat"])
+crop = st.selectbox("🌾 Select Crop", ["Potato", "Corn", "Rice", "Wheat"])
 
 # =======================
 # File Uploader
 # =======================
 uploaded_file = st.file_uploader(
-    "Upload Crop Image",
+    "🖼️ Upload Crop Image",
     type=["jpg", "jpeg", "png", "webp"],
     key=f"file_uploader_{st.session_state.uploader_key}"
 )
@@ -276,7 +277,7 @@ with camera_container:
 # Predict Button
 # =======================
 st.markdown('<div class="predict-btn">', unsafe_allow_html=True)
-if st.button("Predict Disease", use_container_width=True):
+if st.button("🔍 Predict Disease", use_container_width=True):
     # Get the current camera file and uploaded file
     camera_file = st.session_state.get("camera_file", None)
 
@@ -291,8 +292,8 @@ if st.button("Predict Disease", use_container_width=True):
             predicted_class, confidence = predict_disease(crop, file_source)
 
             if predicted_class:
-                st.success(f"Predicted Disease: {predicted_class}")
-                st.info(f"Confidence: {confidence}", icon="ℹ️")
+                st.success(f"Predicted Disease:  {predicted_class}", icon="🧠")
+                st.info(f"Confidence:  {confidence:.2f}%", icon="🎯")
 
                 # Centered Try Again button
                 try_again_col1, try_again_col2, try_again_col3 = st.columns([1, 1, 1])
