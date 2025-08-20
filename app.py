@@ -1,7 +1,9 @@
 import streamlit as st
-import requests
+import tensorflow as tf
 from PIL import Image
+import numpy as np
 import io
+import os
 
 # =======================
 # Streamlit Page Config
@@ -15,10 +17,77 @@ st.set_page_config(
 
 
 # =======================
-# Session state
+# Session State
 # =======================
 if "uploader_key" not in st.session_state:
     st.session_state.uploader_key = 0
+if "camera_on" not in st.session_state:
+    st.session_state.camera_on = False
+if "camera_file" not in st.session_state:
+    st.session_state.camera_file = None
+
+
+
+# =======================
+# Crop models info
+# =======================
+CROPS = {
+    "corn": {
+        "model_path": "./corn/saved_models/corn_disease_model.h5",
+        "class_names": ["Common_Rust", "Gray_Leaf_Spot", "Healthy", "Northern_Leaf_Blight"],
+        "image_size": 224
+    },
+    "potato": {
+        "model_path": "./potato/saved_models/potato_disease_model.h5",
+        "class_names": ["Early_Blight", "Healthy", "Late_Blight"],
+        "image_size": 224
+    },
+    "rice": {
+        "model_path": "./rice/saved_models/rice_disease_model.h5",
+        "class_names": ["Brown_Spot", "Healthy", "Leaf_Blast", "Neck_Blast"],
+        "image_size": 224
+    },
+    "wheat": {
+        "model_path": "./wheat/saved_models/wheat_disease_model.h5",
+        "class_names": ["Brown_Rust", "Healthy", "Yellow_Rust"],
+        "image_size": 224
+    },
+}
+
+
+
+@st.cache_resource
+def load_all_models():
+    models = {}
+    for crop_name, info in CROPS.items():
+        if os.path.exists(info["model_path"]):
+            models[crop_name] = tf.keras.models.load_model(info["model_path"], compile=False)
+            print(f"Loaded {crop_name} model.")
+        else:
+            print(f"Model for {crop_name} not found at {info['model_path']}")
+    return models
+
+models_dict = load_all_models()
+
+
+
+
+# =======================
+# Prediction Function
+# =======================
+def predict_disease(crop: str, image_file):
+    crop_key = crop.lower()
+    if crop_key not in models_dict:
+        return None, None
+    image = Image.open(image_file).convert("RGB")
+    img_array = image.resize((CROPS[crop_key]["image_size"], CROPS[crop_key]["image_size"]))
+    img_array = np.expand_dims(np.array(img_array)/255.0, axis=0)
+    preds = models_dict[crop_key].predict(img_array)
+    idx = np.argmax(preds[0])
+    class_name = CROPS[crop_key]["class_names"][idx]
+    confidence = float(np.max(preds[0]))
+    return class_name, f"{confidence*100:.2f}%"
+
 
 
 
@@ -171,30 +240,6 @@ uploaded_file = st.file_uploader(
 st.markdown(
     """
     <div class="camera-title">Take a photo</div>
-    <style>
-    /* Camera placeholder button styling */
-    button[kind="secondary"][title="Click to open camera"], 
-    button[key="open_camera"] {
-        width: 250px !important;
-        height: 250px !important;
-        font-size: 140px !important;
-        border-radius: 15px !important;
-        border: 3px dashed #90EE90 !important;
-        background-color: #1E1E1E !important;
-        color: #90EE90 !important;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        margin: 0 auto 20px auto;
-        transition: border-color 0.3s;
-    }
-    button[key="open_camera"]:hover {
-        border-color: #32CD32 !important;
-        color: #32CD32 !important;
-        background-color: #1E1E1E !important;
-    }
-    </style>
     """,
     unsafe_allow_html=True
 )
@@ -209,7 +254,7 @@ camera_container = st.container()
 with camera_container:
     if not st.session_state.camera_on:
         # Centered big square camera placeholder
-        placeholder_col1, placeholder_col2, placeholder_col3 = st.columns([1, 2, 1])
+        placeholder_col1, placeholder_col2, placeholder_col3 = st.columns([1, 1, 1])
         with placeholder_col2:
             if st.button("📷", key="open_camera", help="Click to open camera", use_container_width=True):
                 st.session_state.camera_on = True
@@ -243,22 +288,9 @@ if st.button("Predict Disease", use_container_width=True):
             image = Image.open(file_source).convert("RGB")
             st.image(image, caption="Selected Image", use_container_width=True)
 
-            # Convert image to bytes
-            buffered = io.BytesIO()
-            image.save(buffered, format="PNG")
-            img_bytes = buffered.getvalue()
+            predicted_class, confidence = predict_disease(crop, file_source)
 
-            files = {"file": ("image.png", img_bytes, "image/png")}
-            data = {"crop": crop.lower()}
-
-            with st.spinner("Predicting..."):
-                response = requests.post("http://localhost:8000/predict/", files=files, data=data)
-
-            if response.status_code == 200:
-                result = response.json()
-                predicted_class = result.get("predicted_class")
-                confidence = result.get("confidence")
-
+            if predicted_class:
                 st.success(f"Predicted Disease: {predicted_class}")
                 st.info(f"Confidence: {confidence}", icon="ℹ️")
 
@@ -266,18 +298,13 @@ if st.button("Predict Disease", use_container_width=True):
                 try_again_col1, try_again_col2, try_again_col3 = st.columns([1, 1, 1])
                 with try_again_col2:
                     if st.button("🔄 Try Again", key="try_again", use_container_width=True):
-                        # Clear camera-related session states
                         st.session_state.camera_on = False
                         st.session_state.camera_file = None
-
-                        # Reset file uploader by incrementing its key
                         st.session_state.uploader_key += 1
-
-                        # Force a rerun
                         st.rerun()
 
             else:
-                st.error(f"Error: {response.json().get('error')}")
+                st.error(f"No model loaded for {crop}!")
         except Exception as e:
             st.error(f"Exception: {str(e)}")
     else:
