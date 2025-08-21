@@ -2,7 +2,6 @@ import streamlit as st
 import tensorflow as tf
 from PIL import Image
 import numpy as np
-import io
 import os
 
 # =======================
@@ -15,17 +14,11 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-
 # =======================
 # Session State
 # =======================
 if "uploader_key" not in st.session_state:
     st.session_state.uploader_key = 0
-if "camera_on" not in st.session_state:
-    st.session_state.camera_on = False
-if "camera_file" not in st.session_state:
-    st.session_state.camera_file = None
-
 
 
 # =======================
@@ -54,8 +47,9 @@ CROPS = {
     },
 }
 
-
-
+# =======================
+# Load Models
+# =======================
 @st.cache_resource
 def load_all_models():
     models = {}
@@ -67,8 +61,8 @@ def load_all_models():
             print(f"Model for {crop_name} not found at {info['model_path']}")
     return models
 
-models_dict = load_all_models()
-
+with st.spinner("Loading crop models..."):
+    models_dict = load_all_models()
 
 # =======================
 # Prediction Function
@@ -77,20 +71,18 @@ def predict_disease(crop: str, image_file):
     crop_key = crop.lower()
     if crop_key not in models_dict:
         return None, None
-    image = Image.open(image_file).convert("RGB")
-    img_array = image.resize((CROPS[crop_key]["image_size"], CROPS[crop_key]["image_size"]))
-    img_array = np.expand_dims(np.array(img_array), axis=0)
+    img = Image.open(image_file).convert("RGB").resize(
+        (CROPS[crop_key]["image_size"], CROPS[crop_key]["image_size"])
+    )
+    img_array = np.expand_dims(np.array(img), axis=0)
     preds = models_dict[crop_key].predict(img_array)
     idx = np.argmax(preds[0])
     class_name = CROPS[crop_key]["class_names"][idx]
-    confidence = float(np.max(preds[0]))
-    confidence = confidence*100
+    confidence = float(np.max(preds[0])) * 100
     return class_name, confidence
 
-
-
 # =======================
-# Custom CSS for Dark Mode + Layout
+# Custom CSS
 # =======================
 st.markdown(
     """
@@ -103,7 +95,7 @@ st.markdown(
     .title {
         font-size: 42px;
         font-weight: bold;
-        color: #90EE90;
+        color: #32CD32;
         text-align: center;
         margin-bottom: 60px;
     }
@@ -111,7 +103,7 @@ st.markdown(
     .subtitle {
         font-size: 18px;
         text-align: center;
-        color: #B0B0B0;
+        color: #90EE90;
         margin-bottom: 20px;
     }
 
@@ -134,65 +126,25 @@ st.markdown(
         border-radius: 8px;
     }
 
-    /* Prediction button */
-    .predict-btn > button {
-        background-color: #228B22 !important; /* Forest green */
+    /* Buttons (Predict + Try Again) */
+    div.stButton > button {
+        border: 2px solid #444 !important;
+        border-radius: 10px;
+        background-color: #1E1E1E !important;
         color: white !important;
         font-size: 20px !important;
-        height: 55px;
+        height: 50px;
         width: 100% !important;
-        border-radius: 10px;
-        border: none;
-        margin-top: 20px;
-        margin-bottom: 20px;
-    }
-    .predict-btn > button:hover {
-        background-color: #32CD32 !important; /* Lighter green */
-        color: black !important;
+        margin: 30px 0 30px 0;
     }
 
-
-    /* Camera title */
-    .camera-title {
-        font-size: 16px;
-        color: white;
-        text-align: center;
-        margin: 15px 0 5px 0;
+    div.stButton > button:hover {
+        border-color: #32CD32 !important;
+        color: #32CD32 !important;
+        background-color: #1E1E1E !important;
     }
 
-    /* Camera logo placeholder (big icon like camera feed) */
-    .camera-placeholder {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border: 2px dashed #888888;
-        border-radius: 10px;
-        background-color: #1E1E1E;
-        height: 150px;
-        font-size: 80px;
-        cursor: pointer;
-        color: #90EE90;
-        margin-bottom: 20px;
-        transition: border-color 0.3s;
-    }
-    
-    .camera-placeholder:hover {
-        border-color: #90EE90; /* only border turns green */
-        background-color: #1E1E1E; /* keep background same */
-        color: #90EE90;
-    }
-
-
-    /* Center buttons (for camera buttons only) */
-    .center-btn {
-        display: flex;
-        justify-content: center;
-        margin-top: 15px;
-    }
-    .center-btn button {
-        width: 50% !important;
-    }
-
+    /* Footer */
     footer {
         color: white;
         font-size: 16px;
@@ -215,14 +167,14 @@ st.markdown(
 # =======================
 st.markdown('<div class="title">🌱 Crop Disease Classifier</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="subtitle">Select the crop type, then upload or capture leaf image to predict disease.</div>',
+    '<div class="subtitle">Select the crop type, then upload leaf image to predict disease</div>',
     unsafe_allow_html=True
 )
 
 # =======================
-# Sidebar Crop Selection
+# Crop Selection
 # =======================
-crop = st.selectbox("🌾 Select Crop", ["Corn", "Potato",  "Rice", "Wheat"])
+crop = st.selectbox("🌾 Select Crop", ["Corn", "Potato", "Rice", "Wheat"])
 
 # =======================
 # File Uploader
@@ -233,88 +185,80 @@ uploaded_file = st.file_uploader(
     key=f"file_uploader_{st.session_state.uploader_key}"
 )
 
-# =======================
-# Camera Section
-# =======================
-st.markdown(
-    """
-    <div class="camera-title">Capture a photo</div>
-    """,
-    unsafe_allow_html=True
-)
 
-camera_container = st.container()
-
-# Define functions to toggle camera
-def open_camera():
-    st.session_state.camera_on = True
-
-def close_camera():
-    st.session_state.camera_on = False
+# =========================
+# Initialize session state
+# =========================
+if "predicted_class" not in st.session_state:
+    st.session_state.predicted_class = None
+if "confidence" not in st.session_state:
+    st.session_state.confidence = None
+if "uploader_key" not in st.session_state:
+    st.session_state.uploader_key = 0
+if "camera_file" not in st.session_state:
     st.session_state.camera_file = None
+if "prediction_warning" not in st.session_state:
+    st.session_state.prediction_warning = None  # store warning message
 
-with camera_container:
-    if not st.session_state.camera_on:
-        # Show camera placeholder button
-        placeholder_col1, placeholder_col2, placeholder_col3 = st.columns([2, 1, 2])
-        with placeholder_col2:
-            st.button("📷", key="open_camera", help="Click to open camera",
-                      use_container_width=True, on_click=open_camera)
+# =======================
+# Determine file source
+# =======================
+file_source = uploaded_file if uploaded_file is not None else st.session_state.camera_file
+
+# ==========================
+# Predict / Try Again logic
+# ==========================
+def predict_or_reset():
+    # Clear previous warning
+    st.session_state.prediction_warning = None
+
+    # If prediction exists, reset everything
+    if st.session_state.predicted_class is not None:
+        st.session_state.predicted_class = None
+        st.session_state.confidence = None
+        st.session_state.uploader_key += 1
+        st.session_state.camera_file = None
     else:
-        # Show camera feed
-        st.session_state.camera_file = st.camera_input("Camera Feed")
+        # Prediction step
+        if file_source is not None:
+            try:
+                image = Image.open(file_source).convert("RGB")
+                st.session_state.selected_image = image  # store to session state
+                predicted_class, confidence = predict_disease(crop, file_source)
+                st.session_state.predicted_class = predicted_class
+                st.session_state.confidence = confidence
+            except Exception as e:
+                st.session_state.prediction_warning = f"Exception: {str(e)}"
+        else:
+            st.session_state.prediction_warning = "Please upload an image before predicting!"
 
-        # Close Camera button
-        close_col1, close_col2, close_col3 = st.columns([2, 1, 2])
-        with close_col2:
-            st.button("Close Camera", key="close_cam", use_container_width=True, on_click=close_camera)
+# ==================================
+# Show results if prediction exists
+# ==================================
+if st.session_state.predicted_class is not None:
+    st.image(st.session_state.selected_image, caption="Selected Image", use_container_width=True)
+    st.success(f"Predicted Disease: {crop} - {st.session_state.predicted_class}", icon="🧠")
+    st.info(f"Confidence: {st.session_state.confidence:.2f}%", icon="🎯")
+
+# ================================================
+# Single button handles both predict & try again
+# ================================================
+btn_label = "🔍 Predict Disease" if st.session_state.predicted_class is None else "🔄 Try Again"
+
+col1, col2, col3 = st.columns([1, 1, 1])
+with col2:
+    st.button(btn_label, use_container_width=True, on_click=predict_or_reset)
+
+# =======================
+# Show warning at bottom
+# =======================
+if st.session_state.prediction_warning:
+    st.warning(st.session_state.prediction_warning)
 
 
 
 # =======================
-# Predict Button
-# =======================
-st.markdown('<div class="predict-btn">', unsafe_allow_html=True)
-if st.button("🔍 Predict Disease", use_container_width=True):
-    # Get the current camera file and uploaded file
-    camera_file = st.session_state.get("camera_file", None)
-
-    # Determine which file to use - uploaded file takes priority if it exists
-    file_source = uploaded_file if uploaded_file is not None else camera_file
-
-    if file_source is not None:
-        try:
-            image = Image.open(file_source).convert("RGB")
-            st.image(image, caption="Selected Image", use_container_width=True)
-
-            predicted_class, confidence = predict_disease(crop, file_source)
-
-            if predicted_class:
-                st.success(f"Predicted Disease:  {predicted_class}", icon="🧠")
-                st.info(f"Confidence:  {confidence:.2f}%", icon="🎯")
-
-                # Centered Try Again button
-                try_again_col1, try_again_col2, try_again_col3 = st.columns([1, 1, 1])
-                with try_again_col2:
-                    if st.button("🔄 Try Again", key="try_again", use_container_width=True):
-                        st.session_state.camera_on = False
-                        st.session_state.camera_file = None
-                        st.session_state.uploader_key += 1
-                        st.rerun()
-
-            else:
-                st.error(f"No model loaded for {crop}!")
-        except Exception as e:
-            st.error(f"Exception: {str(e)}")
-    else:
-        st.warning("Please upload or capture an image before predicting!")
-st.markdown('</div>', unsafe_allow_html=True)
-
-
-
-
-# =======================
-# Professional Footer
+# Footer
 # =======================
 st.markdown(
     """
@@ -322,11 +266,10 @@ st.markdown(
     <footer style="text-align: center; color: #B0B0B0; font-size: 14px; line-height: 1.6;">
         🌱 Crop Disease Classifier &nbsp;&nbsp;|&nbsp;&nbsp;
         Built by <b>Niloy Sannyal</b> <br>
-        Email: <a href="mailto:niloysannyal@gmail.com" style="color:#90EE90;">niloysannyal@gmail.com</a> &nbsp;&nbsp;|&nbsp;&nbsp;
-        GitHub: <a href="https://github.com/niloysannyal" target="_blank" style="color:#90EE90;">github.com/niloysannyal</a> <br>
+        Email: <a href="mailto:niloysannyal@gmail.com" style="color:#32CD32;">niloysannyal@gmail.com</a> &nbsp;&nbsp;|&nbsp;&nbsp;
+        GitHub: <a href="https://github.com/niloysannyal" target="_blank" style="color:#32CD32;">github.com/niloysannyal</a> <br>
         &copy; 2025 All rights reserved.
     </footer>
     """,
     unsafe_allow_html=True,
 )
-
