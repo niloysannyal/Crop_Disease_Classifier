@@ -34,22 +34,22 @@ if "camera_file" not in st.session_state:
 CROPS = {
     "corn": {
         "model_path": "./corn/saved_models/corn_disease_model.h5",
-        "class_names": ["Common_Rust", "Gray_Leaf_Spot", "Healthy", "Northern_Leaf_Blight"],
+        "class_names": ["Common Rust", "Gray Leaf Spot", "Healthy", "Northern Leaf Blight"],
         "image_size": 224
     },
     "potato": {
         "model_path": "./potato/saved_models/potato_disease_model.h5",
-        "class_names": ["Early_Blight", "Healthy", "Late_Blight"],
+        "class_names": ["Early Blight", "Healthy", "Late Blight"],
         "image_size": 224
     },
     "rice": {
         "model_path": "./rice/saved_models/rice_disease_model.h5",
-        "class_names": ["Brown_Spot", "Healthy", "Leaf_Blast", "Neck_Blast"],
+        "class_names": ["Brown Spot", "Healthy", "Leaf Blast", "Neck Blast"],
         "image_size": 224
     },
     "wheat": {
         "model_path": "./wheat/saved_models/wheat_disease_model.h5",
-        "class_names": ["Brown_Rust", "Healthy", "Yellow_Rust"],
+        "class_names": ["Brown Rust", "Healthy", "Yellow Rust"],
         "image_size": 224
     },
 }
@@ -70,8 +70,6 @@ def load_all_models():
 models_dict = load_all_models()
 
 
-
-
 # =======================
 # Prediction Function
 # =======================
@@ -88,7 +86,6 @@ def predict_disease(crop: str, image_file):
     confidence = float(np.max(preds[0]))
     confidence = confidence*100
     return class_name, confidence
-
 
 
 
@@ -115,7 +112,7 @@ st.markdown(
         font-size: 18px;
         text-align: center;
         color: #B0B0B0;
-        margin-bottom: 40px;
+        margin-bottom: 20px;
     }
 
     /* File uploader */
@@ -147,6 +144,7 @@ st.markdown(
         border-radius: 10px;
         border: none;
         margin-top: 20px;
+        margin-bottom: 20px;
     }
     .predict-btn > button:hover {
         background-color: #32CD32 !important; /* Lighter green */
@@ -156,10 +154,10 @@ st.markdown(
 
     /* Camera title */
     .camera-title {
-        font-size: 18px;
+        font-size: 16px;
         color: white;
         text-align: center;
-        margin: 20px 0 5px 0;
+        margin: 15px 0 5px 0;
     }
 
     /* Camera logo placeholder (big icon like camera feed) */
@@ -167,10 +165,10 @@ st.markdown(
         display: flex;
         justify-content: center;
         align-items: center;
-        border: 2px dashed #888888;  /* default gray border */
+        border: 2px dashed #888888;
         border-radius: 10px;
-        background-color: #1E1E1E;  /* background stays dark */
-        height: 150px;  /* same as camera feed */
+        background-color: #1E1E1E;
+        height: 150px;
         font-size: 80px;
         cursor: pointer;
         color: #90EE90;
@@ -217,14 +215,14 @@ st.markdown(
 # =======================
 st.markdown('<div class="title">🌱 Crop Disease Classifier</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="subtitle">Upload an image or capture using camera, then select the crop type to predict disease.</div>',
+    '<div class="subtitle">Select the crop type, then upload or capture leaf image to predict disease.</div>',
     unsafe_allow_html=True
 )
 
 # =======================
 # Sidebar Crop Selection
 # =======================
-crop = st.selectbox("🌾 Select Crop", ["Potato", "Corn", "Rice", "Wheat"])
+crop = st.selectbox("🌾 Select Crop", ["Corn", "Potato",  "Rice", "Wheat"])
 
 # =======================
 # File Uploader
@@ -240,36 +238,36 @@ uploaded_file = st.file_uploader(
 # =======================
 st.markdown(
     """
-    <div class="camera-title">Take a photo</div>
+    <div class="camera-title">Capture a photo</div>
     """,
     unsafe_allow_html=True
 )
 
-if "camera_on" not in st.session_state:
-    st.session_state.camera_on = False
-if "camera_file" not in st.session_state:
-    st.session_state.camera_file = None
-
 camera_container = st.container()
+
+# Define functions to toggle camera
+def open_camera():
+    st.session_state.camera_on = True
+
+def close_camera():
+    st.session_state.camera_on = False
+    st.session_state.camera_file = None
 
 with camera_container:
     if not st.session_state.camera_on:
-        # Centered big square camera placeholder
-        placeholder_col1, placeholder_col2, placeholder_col3 = st.columns([1, 1, 1])
+        # Show camera placeholder button
+        placeholder_col1, placeholder_col2, placeholder_col3 = st.columns([2, 1, 2])
         with placeholder_col2:
-            if st.button("📷", key="open_camera", help="Click to open camera", use_container_width=True):
-                st.session_state.camera_on = True
+            st.button("📷", key="open_camera", help="Click to open camera",
+                      use_container_width=True, on_click=open_camera)
     else:
         # Show camera feed
         st.session_state.camera_file = st.camera_input("Camera Feed")
 
-        # Centered Close Camera button
-        close_col1, close_col2, close_col3 = st.columns([1, 1, 1])
+        # Close Camera button
+        close_col1, close_col2, close_col3 = st.columns([2, 1, 2])
         with close_col2:
-            if st.button("Close Camera", key="close_cam", use_container_width=True):
-                st.session_state.camera_on = False
-                st.session_state.camera_file = None
-
+            st.button("Close Camera", key="close_cam", use_container_width=True, on_click=close_camera)
 
 
 
