@@ -1,9 +1,15 @@
-# 🌾 Crop Disease Classifier
+# 🌱 Crop Disease Classifier
 
-[![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)  [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-orange.svg)](https://www.tensorflow.org/)  [![Streamlit](https://img.shields.io/badge/Streamlit-1.x-ff4b4b.svg)](https://streamlit.io/)  [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)  
+**AI-Powered Plant Disease Detection Web Application** <br>
+A web application leveraging TensorFlow, Keras, and Streamlit to assist farmers and researchers in identifying plant diseases from leaf images. Users can upload crop images to receive accurate disease predictions with confidence scores, all through a clean and intuitive interface.
 
-An AI-powered web application built with **TensorFlow**, **Keras**, and **Streamlit** to help farmers and researchers detect plant diseases from leaf images.  
-Upload a crop image, and the app predicts the disease class with confidence, providing a simple and user-friendly interface.
+<img width="1875" height="952" alt="Screenshot (190)" src="https://github.com/user-attachments/assets/fa321405-9748-4937-a369-f65e81edb85f" />
+
+<p align="center">
+  <a href="https://cropdiseaseclassifier.streamlit.app/">
+    <img src="https://img.shields.io/badge/LIVE-VISIT%20NOW-blue?style=for-the-badge&logo=streamlit" alt="Live">
+  </a>
+</p>
 
 ---
 
@@ -18,6 +24,7 @@ Upload a crop image, and the app predicts the disease class with confidence, pro
 ---
 
 ## 🛠️ Tech Stack
+[![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)  [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-orange.svg)](https://www.tensorflow.org/) [![Keras](https://img.shields.io/badge/Keras-3.x-D00000.svg)](https://keras.io/) [![Pillow](https://img.shields.io/badge/Pillow-9.x-3670A0.svg)](https://python-pillow.org/)  [![Streamlit](https://img.shields.io/badge/Streamlit-1.x-ff4b4b.svg)](https://streamlit.io/)  [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)  
 - **Python 3.9+**
 - [TensorFlow / Keras](https://www.tensorflow.org/) – Deep learning model  
 - [NumPy](https://numpy.org/) – Data processing  
@@ -71,8 +78,8 @@ Crop_Disease_Classifier/
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/your-username/CropDiseaseClassifier.git
-cd CropDiseaseClassifier
+git clone https://github.com/niloysannyal/Crop_Disease_Classifier.git
+cd Crop_Disease_Classifier
 ```
 
 ### 2. Create a virtual environment
@@ -100,6 +107,7 @@ streamlit run app.py
 - Output: Predicted disease class & confidence score
 - Training data: Public crop disease dataset (PlantVillage or similar)
 
+---
 
 ## 🎯 Usage
 1. Select Crop type (Corn, Potato, Rice, Wheat)
@@ -108,10 +116,20 @@ streamlit run app.py
 4. View prediction result with confidence score
 5. Click 🔄 Try Again to test another image
 
+https://github.com/user-attachments/assets/bbfb7169-8434-42eb-bb8d-799f46b1107c
+
+---
 
 ## 📸 Screenshots
-(App Screenshots will be added here)
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/1b8e19a6-5327-49b8-bb8e-e2c3b21bbcb2" alt="Image 1" width="22%">
+  <img src="https://github.com/user-attachments/assets/ea576a17-28bb-400b-aa5f-da771da2f235" alt="Image 2" width="22%">
+  <img src="https://github.com/user-attachments/assets/750e2e3f-6e85-4788-b2e7-2a33ed341f3d" alt="Image 3" width="22%">
+  <img src="https://github.com/user-attachments/assets/a4f78ffb-4b12-4508-951a-3e5a45518614" alt="Image 4" width="22%">
+</p>
+
+---
 
 ## 🤝 Contributing  
 Contributions, issues, and feature requests are welcome!  
@@ -129,4 +147,4 @@ This project is licensed under the **MIT License** – see the [LICENSE](LICENSE
 📍 Dhaka, Bangladesh  
 📧 [niloysannyal@gmail.com](mailto:niloysannyal@gmail.com)  
 
-🔗 [Portfolio](#) | [LinkedIn](#) | [GitHub](#)  
+🔗 [Portfolio](https://niloysannyal.github.io/Portfolio/) | [LinkedIn](https://www.linkedin.com/in/niloysannyal) | [GitHub](https://github.com/niloysannyal)  
