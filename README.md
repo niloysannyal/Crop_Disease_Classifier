@@ -24,12 +24,14 @@ A web application leveraging TensorFlow, Keras, and Streamlit to assist farmers 
 ---
 
 ## 🛠️ Tech Stack
-[![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)  [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-orange.svg)](https://www.tensorflow.org/) [![Keras](https://img.shields.io/badge/Keras-3.x-D00000.svg)](https://keras.io/) [![Pillow](https://img.shields.io/badge/Pillow-9.x-3670A0.svg)](https://python-pillow.org/)  [![Streamlit](https://img.shields.io/badge/Streamlit-1.x-ff4b4b.svg)](https://streamlit.io/)  [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)  
-- **Python 3.9+**
+[![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)  [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-orange.svg)](https://www.tensorflow.org/) [![Keras](https://img.shields.io/badge/Keras-3.x-D00000.svg)](https://keras.io/) [![Pillow](https://img.shields.io/badge/Pillow-9.x-3670A0.svg)](https://python-pillow.org/)  [![Streamlit](https://img.shields.io/badge/Streamlit-1.x-ff4b4b.svg)](https://streamlit.io/) [![FastAPI](https://img.shields.io/badge/FastAPI-0.115%2B-009688.svg)](https://fastapi.tiangolo.com/)
+ [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)  
+- **Python 3.9+** - Core programming language
 - [TensorFlow / Keras](https://www.tensorflow.org/) – Deep learning model  
 - [NumPy](https://numpy.org/) – Data processing  
 - [Pillow](https://pillow.readthedocs.io/) – Image handling  
-- [Streamlit](https://streamlit.io/) – Web application framework  
+- [Streamlit](https://streamlit.io/) – Web application framework
+- [FastAPI](https://fastapi.tiangolo.com/) – Backend implementation for handling model inference and API requests.
 
 ---
 
@@ -39,30 +41,30 @@ A web application leveraging TensorFlow, Keras, and Streamlit to assist farmers 
 Crop_Disease_Classifier/
 ├── corn/
 │   ├── checkpoints/                          # Saved models for each epoch
-│   ├── corn_disease/                         # Corn dataset
+│   ├── corn_disease/                         # Corn disease dataset
 │   ├── saved_models/
-│   │   └── corn_disease_model.h5             # Pre-trained CNN model
+│   │   └── corn_disease_model.h5             # Trained CNN model
 │   └── corn_disease_classification.ipynb     # Model training notebook
 │
 ├── potato/
 │   ├── checkpoints/                          # Saved models for each epoch
-│   ├── potato_disease/                       # Potato dataset
+│   ├── potato_disease/                       # Potato disease dataset
 │   ├── saved_models/
-│   │   └── potato_disease_model.h5           # Pre-trained CNN model
+│   │   └── potato_disease_model.h5           # Trained CNN model
 │   └── potato_disease_classification.ipynb   # Model training notebook
 │
 ├── rice/
 │   ├── checkpoints/                          # Saved models for each epoch
-│   ├── rice_disease/                         # Rice dataset
+│   ├── rice_disease/                         # Rice disease dataset
 │   ├── saved_models/
-│   │   └── rice_disease_model.h5             # Pre-trained CNN model
+│   │   └── rice_disease_model.h5             # Trained CNN model
 │   └── rice_disease_classification.ipynb     # Model training notebook
 │
 ├── wheat/
 │   ├── checkpoints/                          # Saved models for each epoch
-│   ├── wheat_disease/                        # Wheat dataset
+│   ├── wheat_disease/                        # Wheat disease dataset
 │   ├── saved_models/
-│   │   └── wheat_disease_model.h5            # Pre-trained CNN model
+│   │   └── wheat_disease_model.h5            # Trained CNN model
 │   └── wheat_disease_classification.ipynb    # Model training notebook
 │
 ├── main.py                                   # FastAPI backend for experiment
@@ -104,6 +106,7 @@ streamlit run app.py
 ## 📊 Model Details
 - Architecture: Convolutional Neural Network (CNN)
 - Input size: 224x224 pixels (RGB)
+- Batch size: 32
 - Output: Predicted disease class & confidence score
 - Training data: Public crop disease dataset (PlantVillage or similar)
 
